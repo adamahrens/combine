@@ -4,6 +4,33 @@ import Combine
 var subscriptions = Set<AnyCancellable>()
 
 example(of: "Create a Blackjack card dealer") {
+  
+  final class HandSubscriber: Subscriber {
+    func receive(subscription: Subscription) {
+      print("HandSubscriber#receive(subscription)")
+      subscription.request(.unlimited)
+    }
+    
+    func receive(_ input: Hand) -> Subscribers.Demand {
+      print("HandSubscriber#receive(value) -> .unlimited")
+      return .unlimited
+    }
+    
+    func receive(completion: Subscribers.Completion<HandError>) {
+      print("HandSubscriber#complete")
+      
+      switch completion {
+        case .finished:
+        print("HandSubscriber#finished")
+        case .failure(let error):
+        print("HandSubscriber#error \(error)")
+      }
+    }
+    
+    typealias Input = Hand
+    typealias Failure = HandError
+  }
+  
   let dealtHand = PassthroughSubject<Hand, HandError>()
   
   func deal(_ cardCount: UInt) {
@@ -27,7 +54,6 @@ example(of: "Create a Blackjack card dealer") {
   }
   
   // Add subscription to dealtHand here
-  
   _ = dealtHand.sink(receiveCompletion: { completion in
     print("Got completion event")
     switch completion {
@@ -42,6 +68,11 @@ example(of: "Create a Blackjack card dealer") {
     print("Score: \(cards.points)")
   }
   
+  // Custom Subscriber
+  let subscriber = HandSubscriber()
+  dealtHand.subscribe(subscriber)
+  
+  // Using assign
   
   // Get 3 cards
   deal(3)
