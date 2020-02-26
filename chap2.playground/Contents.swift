@@ -95,10 +95,80 @@ example(of: "Custom Subscriber") {
   publisher2.subscribe(subscriber2)
 }
 
+example(of: "Passthrough Subject") {
+  enum CustomError: Error {
+    case overTheLine
+    case markItZero
+  }
+  
+  final class StringSubscriber: Subscriber {
+    func receive(subscription: Subscription) {
+      // Only want to receive 4 items or less
+      subscription.request(.max(4))
+    }
+    
+    func receive(_ input: String) -> Subscribers.Demand {
+      print("Received \(input)")
+      return input == "World" ? .max(1) : .none
+    }
+    
+    func receive(completion: Subscribers.Completion<CustomError>) {
+      print("Complete")
+    }
+    
+    typealias Input = String
+    typealias Failure = CustomError
+  }
+  
+  let subscriber = StringSubscriber()
+  let subject = PassthroughSubject<String, CustomError>()
+  subject.subscribe(subscriber)
+  
+  subscriptions.insert(
+    subject.sink(receiveCompletion: { completion in
+      print("Received Completion (sink)", completion)
+    }, receiveValue: { next in
+      print("Next (sink)", next)
+    })
+  )
+  
+  subject.send("Hello")
+  subject.send("!")
+  subject.send("World")
+}
+
+example(of: "CurrentValue Subject") {
+  let subject = CurrentValueSubject<String, Never>("Hello")
+  subject.sink { next in
+    print(next)
+  }.store(in: &subscriptions)
+  
+  subject.send("Darkness")
+  subject.send("My")
+  subject.send("Old")
+  
+  print("Current value is \(subject.value)")
+  subject.send("Friend")
+  
+  // This will get the last sent value
+  subject.sink { next in
+    print("Other Subscriber: \(next)")
+  }.store(in: &subscriptions)
+}
+
 example(of: "Future") {
   func futureIncrement(integer: Int, afterDelay delay: TimeInterval) -> Future<Int,Never> {
-    
+    return Future<Int, Never> { promise in
+      DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
+        let next = integer + 1
+        promise(.success(next))
+      }
+    }
   }
+  
+  // Example
+  let future = futureIncrement(integer: 5, afterDelay: 5)
+  future.sink(receiveCompletion: { print($0) }) { print($0) }.store(in: &subscriptions)
 }
 
 /// Copyright (c) 2019 Razeware LLC
