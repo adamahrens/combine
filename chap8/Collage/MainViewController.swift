@@ -77,6 +77,21 @@ class MainViewController: UIViewController {
   
   @IBAction func actionSave() {
     guard let image = imagePreview.image else { return }
+    
+    PhotoWriter
+      .save(image: image)
+      .sink(receiveCompletion: { [weak self] result in
+        switch result {
+          case .finished:
+            print("Finished saving collage to photos")
+            self?.actionClear()
+          case .failure(let error):
+            print(error)
+            self?.showMessage("Error", description: error.localizedDescription)
+        }
+      }) { [weak self] id in
+        self?.showMessage("Success", description: "Saved with id \(id)")
+      }.store(in: &subscriptions)
   }
   
   @IBAction func randomAdd(_ sender: Any) {
