@@ -27,6 +27,7 @@
 /// THE SOFTWARE.
 
 import UIKit
+import Combine
 
 class MainViewController: UIViewController {
   
@@ -37,19 +38,28 @@ class MainViewController: UIViewController {
       imagePreview.layer.borderColor = UIColor.gray.cgColor
     }
   }
+  
   @IBOutlet weak var buttonClear: UIButton!
   @IBOutlet weak var buttonSave: UIButton!
   @IBOutlet weak var itemAdd: UIBarButtonItem!
 
   // MARK: - Private properties
   
-
+  private var subscriptions = Set<AnyCancellable>()
+  private let images = CurrentValueSubject<[UIImage], Never>([])
+  
   // MARK: - View controller
   
   override func viewDidLoad() {
     super.viewDidLoad()
     let collageSize = imagePreview.frame.size
-    
+    images
+      .handleEvents(receiveOutput: { [weak self] photos in
+        self?.updateUI(photos: photos)
+      })
+      .map { photos in UIImage.collage(images: photos, size: collageSize) }
+      .assign(to: \.image, on: imagePreview)
+      .store(in: &subscriptions)
   }
   
   private func updateUI(photos: [UIImage]) {
@@ -62,16 +72,39 @@ class MainViewController: UIViewController {
   // MARK: - Actions
   
   @IBAction func actionClear() {
-    
+    images.send([])
   }
   
   @IBAction func actionSave() {
     guard let image = imagePreview.image else { return }
-    
   }
   
-  @IBAction func actionAdd() {
-    
+  @IBAction func actionAdd() {    
+    // Networking
+    let request = URLRequest(url: URL(string: "https://source.unsplash.com/random/300x300")!)
+    URLSession.shared
+      .dataTaskPublisher(for: request)
+      .filter { response in
+        guard let httpResponse = response.response as? HTTPURLResponse else { return false }
+        return httpResponse.statusCode == 200
+    }.map { response in
+      return UIImage(data: response.data)
+    }
+    .receive(on: RunLoop.main)
+    .sink(receiveCompletion: { result in
+      switch result {
+        case .failure(let error):
+        print(error)
+        case .finished:
+        print("finished fetching from unsplash")
+      }
+    }) { [weak self] image in
+      if let i = image, let self = self {
+        print("We have an image")
+        let addedImages = self.images.value + [i]
+        self.images.send(addedImages)
+      }
+    }.store(in: &subscriptions)
   }
   
   private func showMessage(_ title: String, description: String? = nil) {
