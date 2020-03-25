@@ -79,7 +79,7 @@ class MainViewController: UIViewController {
     guard let image = imagePreview.image else { return }
   }
   
-  @IBAction func actionAdd() {    
+  @IBAction func randomAdd(_ sender: Any) {
     // Networking
     let request = URLRequest(url: URL(string: "https://source.unsplash.com/random/300x300")!)
     URLSession.shared
@@ -94,9 +94,9 @@ class MainViewController: UIViewController {
     .sink(receiveCompletion: { result in
       switch result {
         case .failure(let error):
-        print(error)
+          print(error)
         case .finished:
-        print("finished fetching from unsplash")
+          print("finished fetching from unsplash")
       }
     }) { [weak self] image in
       if let i = image, let self = self {
@@ -105,6 +105,21 @@ class MainViewController: UIViewController {
         self.images.send(addedImages)
       }
     }.store(in: &subscriptions)
+  }
+  
+  @IBAction func actionAdd() {
+    let viewController = storyboard?.instantiateViewController(identifier: "PhotosViewController") as! PhotosViewController
+    
+    // Subscribe to images
+    let image = viewController.selectedPhoto
+    image.map { [weak self] next in
+      let current = self?.images.value ?? []
+      return current + [next]
+    }
+    .assign(to: \.value, on: images)
+    .store(in: &subscriptions)
+    
+    navigationController?.pushViewController(viewController, animated: true)
   }
   
   private func showMessage(_ title: String, description: String? = nil) {

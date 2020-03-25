@@ -28,14 +28,17 @@
 
 import UIKit
 import Photos
+import Combine
 
 class PhotosViewController: UICollectionViewController {
   
   // MARK: - Public properties
-  
+  var selectedPhoto: AnyPublisher<UIImage, Never> {
+    return photoSubject.eraseToAnyPublisher()
+  }
   
   // MARK: - Private properties
-    
+  private let photoSubject = PassthroughSubject<UIImage, Never>()
   private lazy var photos = PhotosViewController.loadPhotos()
   private lazy var imageManager = PHCachingImageManager()
   
@@ -107,19 +110,16 @@ class PhotosViewController: UICollectionViewController {
       }
       
       // Send the selected photo
-      
+      self.photoSubject.send(image)
     })
   }
-
 }
 
 // MARK: - Fetch assets
 extension PhotosViewController {
-  
   static func loadPhotos() -> PHFetchResult<PHAsset> {
     let allPhotosOptions = PHFetchOptions()
     allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
     return PHAsset.fetchAssets(with: allPhotosOptions)
   }
-  
 }
