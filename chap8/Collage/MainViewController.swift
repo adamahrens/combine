@@ -126,8 +126,20 @@ class MainViewController: UIViewController {
     let viewController = storyboard?.instantiateViewController(identifier: "PhotosViewController") as! PhotosViewController
     
     // Subscribe to images
-    let image = viewController.selectedPhoto.share()
-    image.map { [weak self] next in
+    let newImage = viewController.selectedPhoto.share()
+    
+    // Sets the title back after 3 seconds
+    newImage
+      .ignoreOutput()
+      .delay(for: 3.0, scheduler: DispatchQueue.main)
+      .sink(receiveCompletion: { [weak self] _ in
+        guard let self = self else { return }
+        self.updateUI(photos: self.images.value)
+      }) { _ in }
+      .store(in: &subscriptions)
+    
+    // Updates the images Passthrough
+    newImage.map { [weak self] next in
       let current = self?.images.value ?? []
       return current + [next]
     }
