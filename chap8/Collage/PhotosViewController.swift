@@ -37,6 +37,9 @@ class PhotosViewController: UICollectionViewController {
     return photoSubject.eraseToAnyPublisher()
   }
   
+  // Adds an $selectedPhotosCount for subscribing to
+  @Published var selectedPhotosCount = 0
+  
   // MARK: - Private properties
   private let photoSubject = PassthroughSubject<UIImage, Never>()
   private lazy var photos = PhotosViewController.loadPhotos()
@@ -109,8 +112,9 @@ class PhotosViewController: UICollectionViewController {
         return
       }
       
-      // Send the selected photo
+      // Send the selected photo & Update the count
       self.photoSubject.send(image)
+      self.selectedPhotosCount += 1
     })
   }
 }

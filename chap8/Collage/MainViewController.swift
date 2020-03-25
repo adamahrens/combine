@@ -126,7 +126,7 @@ class MainViewController: UIViewController {
     let viewController = storyboard?.instantiateViewController(identifier: "PhotosViewController") as! PhotosViewController
     
     // Subscribe to images
-    let image = viewController.selectedPhoto
+    let image = viewController.selectedPhoto.share()
     image.map { [weak self] next in
       let current = self?.images.value ?? []
       return current + [next]
@@ -134,14 +134,26 @@ class MainViewController: UIViewController {
     .assign(to: \.value, on: images)
     .store(in: &subscriptions)
     
+    // Update title
+    viewController
+      .$selectedPhotosCount
+      .filter { $0 > 0 }
+      .map { "Selected \($0) Photos" }
+      .assign(to: \.title, on: self)
+      .store(in: &subscriptions)
+    
     navigationController?.pushViewController(viewController, animated: true)
   }
   
   private func showMessage(_ title: String, description: String? = nil) {
-    let alert = UIAlertController(title: title, message: description, preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "Close", style: .default, handler: { alert in
-      self.dismiss(animated: true, completion: nil)
-    }))
-    present(alert, animated: true, completion: nil)
+//    let alert = UIAlertController(title: title, message: description, preferredStyle: .alert)
+//    alert.addAction(UIAlertAction(title: "Close", style: .default, handler: { alert in
+//      self.dismiss(animated: true, completion: nil)
+//    }))
+//    present(alert, animated: true, completion: nil)
+    
+    alert(title: title, text: description)
+      .sink { _ in print("Got an alert") }
+      .store(in: &subscriptions)
   }
 }
