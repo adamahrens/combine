@@ -27,6 +27,7 @@
 /// THE SOFTWARE.
 
 import SwiftUI
+import Combine
 
 /// A view displaying an "hour:minutes" badge.
 struct TimeBadge: View {
@@ -39,13 +40,15 @@ struct TimeBadge: View {
 
   let time: TimeInterval
   
+  @Environment(\.colorScheme) var colorScheme: ColorScheme
+  
   var body: some View {
     Text(TimeBadge.formatter.string(from: Date(timeIntervalSince1970: time)))
       .font(.headline)
       .fontWeight(.heavy)
       .padding(10)
       .foregroundColor(Color.white)
-      .background(Color.orange)
+      .background(self.colorScheme == .light ? Color.blue : Color.orange)
       .cornerRadius(6)
       .frame(idealWidth: 100)
       .padding(.bottom, 10)

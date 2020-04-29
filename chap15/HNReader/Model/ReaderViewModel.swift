@@ -27,17 +27,31 @@
 /// THE SOFTWARE.
 
 import Foundation
+import Combine
+import SwiftUI
 
-class ReaderViewModel {
+final class ReaderViewModel: ObservableObject {
   private let api = API()
-  private var allStories = [Story]()
-
-  var filter = [String]()
+  private var subscriptions = Set<AnyCancellable>()
+  
+  @Published var allStories = [Story]()
+  @Published var error: API.Error? = nil
+  @Published var filter = [String]()
+  @Published var header: String = ""
+    
+  var filterHeader: String {
+    if filter.count == 0 {
+      return "Showing all stories"
+    }
+    
+    return "Filter: " + filter.joined(separator: ",")
+  }
   
   var stories: [Story] {
-    guard !filter.isEmpty else {
-      return allStories
-    }
+    guard
+      !filter.isEmpty
+    else { return allStories }
+    
     return allStories
       .filter { story -> Bool in
         return filter.reduce(false) { isMatch, keyword -> Bool in
@@ -46,5 +60,28 @@ class ReaderViewModel {
       }
   }
   
-  var error: API.Error? = nil
+  func fetchStories() {
+    api
+      .stories()
+      .receive(on: DispatchQueue.main)
+      .sink(receiveCompletion: { result in
+        if case .failure(let error) = result {
+          self.error = error
+          self.allStories = []
+        }
+      }) { stories in
+        self.allStories = stories
+        self.error = nil
+        
+        let count = stories.count
+        
+        if count == 0 {
+          self.header = "No stories"
+        } else if count == 1 {
+          self.header = "1 Story"
+        } else {
+          self.header = "\(count) Stories"
+        }
+    }.store(in: &subscriptions)
+  }
 }

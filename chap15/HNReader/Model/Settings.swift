@@ -27,9 +27,20 @@
 /// THE SOFTWARE.
 
 import Foundation
+import Combine
 
-final class Settings {
-  init() { }
+fileprivate let keywordsFile = "filterKeywords"
+
+final class Settings: ObservableObject {
+  @Published var keywords = [FilterKeyword]() {
+    didSet {
+      try? JSONFile.save(value: keywords, named: keywordsFile)
+    }
+  }
   
-  var keywords = [FilterKeyword]()
+  init() {
+    if let storedKeywords: [FilterKeyword] = try? JSONFile.loadValue(named: keywordsFile) {
+      self.keywords = storedKeywords
+    }
+  }
 }

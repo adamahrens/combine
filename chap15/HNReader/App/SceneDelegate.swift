@@ -28,22 +28,34 @@
 
 import UIKit
 import SwiftUI
+import Combine
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
   var window: UIWindow?
   
+  private var subscriptions = Set<AnyCancellable>()
+  
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    
     let viewModel = ReaderViewModel()
-
-    let rootView = ReaderView(model: viewModel)
+    let settings = Settings()
+    
+    // Set environment object that's passed to all views and subviews
+    let rootView = ReaderView(model: viewModel).environmentObject(settings)
+    
+    settings
+      .$keywords
+      .map { $0.map { $0.value }}
+      .assign(to: \.filter, on: viewModel)
+      .store(in: &subscriptions)
     
     if let windowScene = scene as? UIWindowScene {
       let window = UIWindow(windowScene: windowScene)
       window.rootViewController = UIHostingController(rootView: rootView)
       self.window = window
       window.makeKeyAndVisible()
-      
+      viewModel.fetchStories()
     }
   }
 }

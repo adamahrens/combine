@@ -27,23 +27,25 @@
 /// THE SOFTWARE.
 
 import SwiftUI
+import Combine
 
 struct ReaderView: View {
-  var model: ReaderViewModel
-  var presentingSettingsSheet = false
-
-  var currentDate = Date()
+  @ObservedObject var model: ReaderViewModel
+  @State var presentingSettingsSheet = false
+  @State var currentDate = Date()
+  @Environment(\.colorScheme) var colorScheme: ColorScheme
+  @EnvironmentObject var settings: Settings
+  
+  private let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect().eraseToAnyPublisher()
   
   init(model: ReaderViewModel) {
     self.model = model
   }
   
   var body: some View {
-    let filter = "Showing all stories"
-    
     return NavigationView {
       List {
-        Section(header: Text(filter).padding(.leading, -10)) {
+        Section(header: Text(self.model.filterHeader).padding(.leading, -10)) {
           ForEach(self.model.stories) { story in
             VStack(alignment: .leading, spacing: 10) {
               TimeBadge(time: story.time)
@@ -58,21 +60,31 @@ struct ReaderView: View {
                 print(story)
               }
               .font(.subheadline)
-              .foregroundColor(Color.blue)
+              .foregroundColor(self.colorScheme == .light ? .blue : .orange)
               .padding(.top, 6)
             }
             .padding()
           }
           // Add timer here
+          .onReceive(timer) { date in
+            print("Got a new date")
+              self.currentDate = date
+          }
         }.padding()
       }
       // Present the Settings sheet here
+        .sheet(isPresented: $presentingSettingsSheet, content: {
+          SettingsView()
+            .environmentObject(self.settings)
+        })
       // Display errors here
-      .navigationBarTitle(Text("\(self.model.stories.count) Stories"))
+        .alert(item: $model.error, content: { error in
+          Alert(title: Text("Network Error"), message: Text(error.localizedDescription), dismissButton: .cancel())
+        })
+        .navigationBarTitle(Text(self.model.header))
       .navigationBarItems(trailing:
         Button("Settings") {
-          // Set presentingSettingsSheet to true here
-          
+          self.presentingSettingsSheet = true
         }
       )
     }
