@@ -81,7 +81,7 @@ struct ReaderView: View {
         .alert(item: $model.error, content: { error in
           Alert(title: Text("Network Error"), message: Text(error.localizedDescription), dismissButton: .cancel())
         })
-        .navigationBarTitle(Text(self.model.header))
+      .navigationBarTitle(Text(self.model.header))
       .navigationBarItems(trailing:
         Button("Settings") {
           self.presentingSettingsSheet = true
