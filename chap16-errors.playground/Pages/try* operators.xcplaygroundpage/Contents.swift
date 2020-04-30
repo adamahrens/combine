@@ -4,7 +4,24 @@ import Combine
 
 var subscriptions = Set<AnyCancellable>()
 //: ## try* operators
-<#Add your code here#>
+example(of: "tryMap") {
+  enum NameError: Error {
+    case tooShort(String)
+    case unknown
+  }
+  
+  let names = ["Leroy", "Jenkins", "Roy", "Patty"].publisher
+  names
+  .tryMap { name -> Int in
+    guard name.count >= 5 else { throw NameError.tooShort(name) }
+    return name.count
+  }
+  .sink(receiveCompletion: { completion in
+    print("Completed: \(completion)")
+  }, receiveValue: { next in
+    print("Next: \(next)")
+  })
+}
 //: [Next](@next)
 
 /// Copyright (c) 2019 Razeware LLC

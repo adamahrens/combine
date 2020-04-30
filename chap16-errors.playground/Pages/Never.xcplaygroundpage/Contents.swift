@@ -5,6 +5,45 @@ var subscriptions = Set<AnyCancellable>()
 //: ## Never
 example(of: "Never sink") {
   Just("Hello")
+    .sink { next in
+      print("Got \(next)")
+  }.store(in: &subscriptions)
+}
+
+enum Shit: Error {
+  case hitTheFan
+}
+
+example(of: "setFailureType") {
+  Just("Hello World")
+    .setFailureType(to: Shit.self)
+    .sink(receiveCompletion: { completion in
+      switch completion {
+        case .finished :
+          print("finished")
+        case .failure(.hitTheFan):
+          print("shit has hit the fan")
+      }
+    }) { next in
+      print("Got \(next)")
+  }.store(in: &subscriptions)
+}
+
+example(of: "assign") {
+  class Person {
+    let id = UUID()
+    var name = "unknown"
+  }
+  
+  let person = Person()
+  print(person.name)
+  
+  Just("Leroy")
+    .handleEvents(receiveCompletion: { _ in
+      print(person.name)
+    })
+    .assign(to: \.name, on: person)
+    .store(in: &subscriptions)
 }
 //: [Next](@next)
 
