@@ -31,11 +31,12 @@ import ChuckNorrisJokesModel
 
 struct JokeCardView: View {
   
+  @ObservedObject var viewModel: JokesViewModel
     
   var body: some View {
     ZStack {
       VStack(alignment: .leading, spacing: 20) {
-        Text(ChuckNorrisJokesModel.Joke.starter.value)
+        Text(viewModel.showTranslation ? viewModel.joke.translatedValue : viewModel.joke.value)
           .font(.largeTitle)
           .foregroundColor(.primary)
           .minimumScaleFactor(0.2)
@@ -51,7 +52,7 @@ struct JokeCardView: View {
             .font(.caption)
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
         }
-        .opacity(0)
+        .opacity(viewModel.showTranslation ? 1 : 0)
         
         LargeInlineButton(
           title: "Toggle Language",
@@ -76,7 +77,7 @@ struct JokeCardView: View {
 #if DEBUG
 struct JokeCardView_Previews: PreviewProvider {
   static var previews: some View {
-    JokeCardView()
+    JokeCardView(viewModel: JokesViewModel())
       .previewLayout(.sizeThatFits)
   }
 }

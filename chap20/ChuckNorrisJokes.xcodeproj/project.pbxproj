@@ -71,6 +71,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		436C92DB247C03C200BC94DF /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 		D228A083231334E200EB6975 /* MockJokesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockJokesService.swift; sourceTree = "<group>"; };
 		D228A08523134B3B00EB6975 /* TestJoke.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = TestJoke.json; sourceTree = "<group>"; };
 		D228A08723134F7800EB6975 /* TestTranslatedJoke.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = TestTranslatedJoke.json; sourceTree = "<group>"; };
@@ -245,6 +246,7 @@
 				D2568BA1230AE11B00FFB4E3 /* Models */,
 				D2568BA2230AE12300FFB4E3 /* Views */,
 				D2568BA6230AE16600FFB4E3 /* Supporting Files */,
+				436C92DB247C03C200BC94DF /* TODO.md */,
 			);
 			path = ChuckNorrisJokes;
 			sourceTree = "<group>";
@@ -704,7 +706,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "ChuckNorrisJokes/Preview\\ Content";
-				DEVELOPMENT_TEAM = CX893E63R7;
+				DEVELOPMENT_TEAM = DM75P97468;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = ChuckNorrisJokes/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -725,7 +727,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "ChuckNorrisJokes/Preview\\ Content";
-				DEVELOPMENT_TEAM = CX893E63R7;
+				DEVELOPMENT_TEAM = DM75P97468;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = ChuckNorrisJokes/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -43,3 +43,13 @@ public struct TranslationService {
 
   public init() { }
 }
+
+extension TranslationService: TranslationServiceDataPublisher {
+  public func publisher(for joke: Joke, to languageCode: String) -> AnyPublisher<Data, URLError> {
+    URLSession
+      .shared
+      .dataTaskPublisher(for: url(for: joke, languageCode: languageCode))
+      .map(\.data)
+      .eraseToAnyPublisher()
+  }
+}
