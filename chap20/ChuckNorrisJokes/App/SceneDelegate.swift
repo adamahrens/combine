@@ -28,12 +28,30 @@
 
 import UIKit
 import SwiftUI
+import CoreData
+import Combine
+
+private enum CoreDataStack {
+  static var context: NSManagedObjectContext = {
+    let container = NSPersistentContainer(name: "ChuckNorrisJokes")
+    container.loadPersistentStores { (_, error) in
+      guard error == nil else { fatalError("Unable to create CoreDataStack \(String(describing: error?.localizedDescription))") }
+    }
+    
+    return container.viewContext
+  }()
+  
+  static func save() {
+    guard context.hasChanges else { return }
+    try! context.save()
+  }
+}
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
   
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-    let contentView = JokeView()
+    let contentView = JokeView().environment(\.managedObjectContext, CoreDataStack.context)
     
     if let windowScene = scene as? UIWindowScene {
       let window = UIWindow(windowScene: windowScene)
@@ -49,5 +67,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     // to restore the scene back to its current state.
     
     // Save changes in the application's managed object context when the application transitions to the background.
+    CoreDataStack.save()
   }
 }
