@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		436C92DD247CA2BE00BC94DF /* JokeManagedObject+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436C92DC247CA2BE00BC94DF /* JokeManagedObject+.swift */; };
+		43F1FA45247CAC5900C3AB85 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F1FA44247CAC5900C3AB85 /* SearchBar.swift */; };
+		43F1FA47247CAFC600C3AB85 /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F1FA46247CAFC600C3AB85 /* Search.swift */; };
 		D228A084231334E200EB6975 /* MockJokesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D228A083231334E200EB6975 /* MockJokesService.swift */; };
 		D228A08623134C6E00EB6975 /* TestJoke.json in Resources */ = {isa = PBXBuildFile; fileRef = D228A08523134B3B00EB6975 /* TestJoke.json */; };
 		D228A08823134F7800EB6975 /* TestTranslatedJoke.json in Resources */ = {isa = PBXBuildFile; fileRef = D228A08723134F7800EB6975 /* TestTranslatedJoke.json */; };
@@ -74,6 +76,8 @@
 /* Begin PBXFileReference section */
 		436C92DB247C03C200BC94DF /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 		436C92DC247CA2BE00BC94DF /* JokeManagedObject+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JokeManagedObject+.swift"; sourceTree = "<group>"; };
+		43F1FA44247CAC5900C3AB85 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
+		43F1FA46247CAFC600C3AB85 /* Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Search.swift; sourceTree = "<group>"; };
 		D228A083231334E200EB6975 /* MockJokesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockJokesService.swift; sourceTree = "<group>"; };
 		D228A08523134B3B00EB6975 /* TestJoke.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = TestJoke.json; sourceTree = "<group>"; };
 		D228A08723134F7800EB6975 /* TestTranslatedJoke.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = TestTranslatedJoke.json; sourceTree = "<group>"; };
@@ -288,6 +292,8 @@
 				D2E9466F230B53020012CFFB /* JokeView.swift */,
 				D234D758230ED1C700068BBF /* LargeInlineButton.swift */,
 				D2B46CAE230C7C6F003B2DFA /* SavedJokesView.swift */,
+				43F1FA44247CAC5900C3AB85 /* SearchBar.swift */,
+				43F1FA46247CAFC600C3AB85 /* Search.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -494,6 +500,8 @@
 				D2568BB0230AEAA600FFB4E3 /* ChuckNorrisJokesStyleKit.swift in Sources */,
 				D2E94671230B53020012CFFB /* JokeView.swift in Sources */,
 				D2568B7F230AE10300FFB4E3 /* SceneDelegate.swift in Sources */,
+				43F1FA47247CAFC600C3AB85 /* Search.swift in Sources */,
+				43F1FA45247CAC5900C3AB85 /* SearchBar.swift in Sources */,
 				D2B46CAF230C7C6F003B2DFA /* SavedJokesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

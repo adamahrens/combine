@@ -33,6 +33,7 @@ struct SavedJokesView: View {
   var body: some View {
     VStack {
       NavigationView {
+//        SearchBar(text: $searchText)
         List {
           ForEach(jokes, id: \.self) { joke in
             Text(self.showTranslation ? joke.translatedValue ?? "N/A" : joke.value ?? "N/A")
@@ -64,10 +65,22 @@ struct SavedJokesView: View {
     }
   }
   
+  @State private var searchText = ""
   @State private var showTranslation = false
   @Environment(\.managedObjectContext) private var viewContext
   @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \JokeManagedObject.value, ascending: true)], predicate: nil, animation: .default)
   private var jokes: FetchedResults<JokeManagedObject>
+  
+  private func filteredJokes() -> [JokeManagedObject] {
+    var allJokes = Array(jokes)
+    if searchText.count > 0 {
+      allJokes = allJokes.filter({ joke in
+        return joke.value?.contains(searchText) ?? false
+      })
+    }
+    
+    return allJokes
+  }
 }
 
 struct SavedJokesView_Previews: PreviewProvider {
