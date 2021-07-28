@@ -1,3 +1,12 @@
+//: [Previous](@previous)
+import Foundation
+import Combine
+
+var subscriptions = Set<AnyCancellable>()
+//: ## try* operators
+<#Add your code here#>
+//: [Next](@next)
+
 /// Copyright (c) 2020 Razeware LLC
 ///
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,25 +34,3 @@
 /// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
-
-import UIKit
-import Combine
-
-extension UIViewController {
-  func alert(title: String, message: String?) -> AnyPublisher<Void, Never> {
-    let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    return Future { resolver in
-      alertController.addAction(UIAlertAction(title: "Close", style: .default) { _ in
-        resolver(.success(()))
-      })
-      
-      // Show the Alert
-      self.present(alertController, animated: true)
-    }
-    .handleEvents(receiveCancel: {
-      // Handle dismiss
-      self.dismiss(animated: true)
-    })
-    .eraseToAnyPublisher()
-  }
-}

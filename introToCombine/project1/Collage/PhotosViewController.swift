@@ -28,17 +28,22 @@
 
 import UIKit
 import Photos
+import Combine
 
-class PhotosViewController: UICollectionViewController {
+final class PhotosViewController: UICollectionViewController {
   
   // MARK: - Public properties
+  var selectedPhoto: AnyPublisher<UIImage, Never> {
+    return selectedPhotoSubject.eraseToAnyPublisher()
+  }
   
+  @Published var selectedPhotosCount = 0
   
   // MARK: - Private properties
-    
+  private let selectedPhotoSubject = PassthroughSubject<UIImage, Never>()
+  private var subscriptions = Set<AnyCancellable>()
   private lazy var photos = PhotosViewController.loadPhotos()
   private lazy var imageManager = PHCachingImageManager()
-  
   private lazy var thumbnailSize: CGSize = {
     let cellSize = (self.collectionViewLayout as! UICollectionViewFlowLayout).itemSize
     return CGSize(width: cellSize.width * UIScreen.main.scale,
@@ -51,7 +56,17 @@ class PhotosViewController: UICollectionViewController {
     super.viewDidLoad()
     
     // Check for Photos access authorization and reload the list if authorized.
-    PHPhotoLibrary.fetchAuthorizationStatus { [weak self] status in
+//    PHPhotoLibrary.fetchAuthorizationStatus { [weak self] status in
+//      if status {
+//        self?.photos = PhotosViewController.loadPhotos()
+//
+//        DispatchQueue.main.async {
+//          self?.collectionView.reloadData()
+//        }
+//      }
+//    }
+    
+    PHPhotoLibrary.isAuthorized.sink { [weak self] status in
       if status {
         self?.photos = PhotosViewController.loadPhotos()
         
@@ -59,11 +74,13 @@ class PhotosViewController: UICollectionViewController {
           self?.collectionView.reloadData()
         }
       }
-    }
+    }.store(in: &subscriptions)
   }
   
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
+    
+    selectedPhotoSubject.send(completion: .finished)
   }
     
   // MARK: - UICollectionViewDataSource
@@ -107,7 +124,8 @@ class PhotosViewController: UICollectionViewController {
       }
       
       // Send the selected photo
-      
+      self.selectedPhotoSubject.send(image)
+      self.selectedPhotosCount += 1
     })
   }
 }

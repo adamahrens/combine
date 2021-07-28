@@ -27,23 +27,34 @@
 /// THE SOFTWARE.
 
 import UIKit
+import SwiftUI
 import Combine
 
-extension UIViewController {
-  func alert(title: String, message: String?) -> AnyPublisher<Void, Never> {
-    let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    return Future { resolver in
-      alertController.addAction(UIAlertAction(title: "Close", style: .default) { _ in
-        resolver(.success(()))
-      })
-      
-      // Show the Alert
-      self.present(alertController, animated: true)
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+  
+  var window: UIWindow?
+  
+  private var subscriptions = Set<AnyCancellable>()
+  
+  func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    
+    let userSettings = Settings()
+    let viewModel = ReaderViewModel()
+    
+    userSettings
+      .$keywords
+      .map { $0.map { $0.value } }
+      .assign(to: \.filter, on: viewModel)
+      .store(in: &subscriptions)
+    
+    let rootView = ReaderView(model: viewModel).environmentObject(userSettings)
+    
+    if let windowScene = scene as? UIWindowScene {
+      let window = UIWindow(windowScene: windowScene)
+      window.rootViewController = UIHostingController(rootView: rootView)
+      self.window = window
+      window.makeKeyAndVisible()
+      viewModel.fetchStories()
     }
-    .handleEvents(receiveCancel: {
-      // Handle dismiss
-      self.dismiss(animated: true)
-    })
-    .eraseToAnyPublisher()
   }
 }

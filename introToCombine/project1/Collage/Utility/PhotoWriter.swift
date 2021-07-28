@@ -29,13 +29,30 @@
 import Foundation
 import UIKit
 import Photos
-
 import Combine
 
-class PhotoWriter {
+final class PhotoWriter {
   enum Error: Swift.Error {
     case couldNotSavePhoto
     case generic(Swift.Error)
   }
   
+  static func save(image: UIImage) -> Future<String, PhotoWriter.Error> {
+    return Future { resolve in
+      do {
+        try PHPhotoLibrary.shared().performChangesAndWait {
+          let request = PHAssetChangeRequest.creationRequestForAsset(from: image)
+      
+          guard
+            let savedId = request.placeholderForCreatedAsset?.localIdentifier
+          else { return resolve(.failure(.couldNotSavePhoto)) }
+          
+          // Successfully saved image to Photos library
+          resolve(.success(savedId))
+        }
+      } catch {
+        resolve(.failure(.generic(error)))
+      }
+    }
+  }
 }

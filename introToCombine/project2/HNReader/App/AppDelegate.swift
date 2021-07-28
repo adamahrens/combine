@@ -27,23 +27,14 @@
 /// THE SOFTWARE.
 
 import UIKit
-import Combine
 
-extension UIViewController {
-  func alert(title: String, message: String?) -> AnyPublisher<Void, Never> {
-    let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    return Future { resolver in
-      alertController.addAction(UIAlertAction(title: "Close", style: .default) { _ in
-        resolver(.success(()))
-      })
-      
-      // Show the Alert
-      self.present(alertController, animated: true)
-    }
-    .handleEvents(receiveCancel: {
-      // Handle dismiss
-      self.dismiss(animated: true)
-    })
-    .eraseToAnyPublisher()
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    return true
+  }
+
+  func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+    return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
   }
 }

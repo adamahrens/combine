@@ -26,24 +26,52 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import UIKit
+import Foundation
 import Combine
+import SwiftUI
 
-extension UIViewController {
-  func alert(title: String, message: String?) -> AnyPublisher<Void, Never> {
-    let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    return Future { resolver in
-      alertController.addAction(UIAlertAction(title: "Close", style: .default) { _ in
-        resolver(.success(()))
-      })
-      
-      // Show the Alert
-      self.present(alertController, animated: true)
-    }
-    .handleEvents(receiveCancel: {
-      // Handle dismiss
-      self.dismiss(animated: true)
-    })
-    .eraseToAnyPublisher()
+final class ReaderViewModel: ObservableObject {
+ 
+  @Published private var allStories = [Story]()
+  @Published var error: API.Error? = nil
+  @Published var filter = [String]()
+  
+  private var subscriptions = Set<AnyCancellable>()
+  private let api = API()
+  
+  var filterDisplay: String {
+    guard !filter.isEmpty else { return "Showing all stories" }
+    let filters = filter.joined(separator: ",")
+    return "Filter: \(filters)"
+  }
+  
+  var stories: [Story] {
+    guard
+      !filter.isEmpty
+    else { return allStories }
+    
+    return allStories
+      .filter { story -> Bool in
+        return filter.reduce(false) { isMatch, keyword -> Bool in
+          return isMatch || story.title.lowercased().contains(keyword)
+        }
+      }
+  }
+  
+  // Public Methods
+  func fetchStories() {
+    api
+      .stories()
+      .print("FetchStories ->")
+      .receive(on: DispatchQueue.main)
+      .sink { result in
+        if case .failure(let error) = result {
+          self.allStories = [Story]()
+          self.error = error
+        }
+      } receiveValue: { stories in
+        self.allStories = stories
+        self.error = nil
+      }.store(in: &subscriptions)
   }
 }

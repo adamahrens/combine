@@ -26,24 +26,22 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import UIKit
-import Combine
+import Foundation
 
-extension UIViewController {
-  func alert(title: String, message: String?) -> AnyPublisher<Void, Never> {
-    let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    return Future { resolver in
-      alertController.addAction(UIAlertAction(title: "Close", style: .default) { _ in
-        resolver(.success(()))
-      })
-      
-      // Show the Alert
-      self.present(alertController, animated: true)
-    }
-    .handleEvents(receiveCancel: {
-      // Handle dismiss
-      self.dismiss(animated: true)
-    })
-    .eraseToAnyPublisher()
+struct JSONFile {
+  private static let libraryPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
+  
+  /// Tries to load a persisted value from a JSON file.
+  static func loadValue<T: Codable>(named name: String) throws -> T {
+    let fileURL = URL(fileURLWithPath: libraryPath).appendingPathComponent("\(name).json")
+    let data = try Data(contentsOf: fileURL)
+    return try JSONDecoder().decode(T.self, from: data)
+  }
+  
+  /// Persist an object on disk as a JSON file.
+  static func save<T: Codable>(value: T, named name: String) throws {
+    let data = try JSONEncoder().encode(value)
+    let fileURL = URL(fileURLWithPath: libraryPath).appendingPathComponent("\(name).json")
+    try data.write(to: fileURL)
   }
 }

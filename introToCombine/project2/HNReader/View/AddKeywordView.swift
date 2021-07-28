@@ -26,24 +26,41 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import UIKit
-import Combine
+import SwiftUI
 
-extension UIViewController {
-  func alert(title: String, message: String?) -> AnyPublisher<Void, Never> {
-    let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    return Future { resolver in
-      alertController.addAction(UIAlertAction(title: "Close", style: .default) { _ in
-        resolver(.success(()))
-      })
+/// A dialogue allowing the user to enter a keyword.
+struct AddKeywordView: View {
+  @State var newKeyword = ""
+  
+  let completed: (String) -> Void
+  
+  var body: some View {
+    VStack(spacing: 50) {
+      Text("New keyword")
+        .font(.largeTitle)
+        .padding(.top, 40)
       
-      // Show the Alert
-      self.present(alertController, animated: true)
+      TextField("", text: $newKeyword)
+        .padding(8)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 2))
+        .padding()
+
+      LargeInlineButton(title: "Add keyword") {
+        guard !self.newKeyword.isEmpty else { return }
+        self.completed(self.newKeyword)
+        self.newKeyword = ""
+      }
+      
+      Spacer()
     }
-    .handleEvents(receiveCancel: {
-      // Handle dismiss
-      self.dismiss(animated: true)
-    })
-    .eraseToAnyPublisher()
   }
 }
+
+#if DEBUG
+struct AddKeywordView_Previews: PreviewProvider {
+  static var previews: some View {
+    AddKeywordView(completed: { _ in })
+  }
+}
+#endif

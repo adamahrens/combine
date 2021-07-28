@@ -27,8 +27,9 @@
 /// THE SOFTWARE.
 
 import UIKit
+import Combine
 
-class MainViewController: UIViewController {
+final class MainViewController: UIViewController {
   
   // MARK: - Outlets
 
@@ -43,7 +44,8 @@ class MainViewController: UIViewController {
   @IBOutlet weak var itemAdd: UIBarButtonItem!
 
   // MARK: - Private properties
-  
+  private var subscriptions = Set<AnyCancellable>()
+  private let images = CurrentValueSubject<[UIImage], Never>([])
 
   // MARK: - View controller
   
@@ -51,6 +53,14 @@ class MainViewController: UIViewController {
     super.viewDidLoad()
     let collageSize = imagePreview.frame.size
     
+    images
+      .print("imageCollage")
+      .handleEvents(receiveOutput: { [weak self] photos in
+        self?.updateUI(photos: photos)
+      })
+      .map { UIImage.collage(images: $0, size: collageSize) }
+      .assign(to: \.image, on: imagePreview)
+      .store(in: &subscriptions)
   }
   
   private func updateUI(photos: [UIImage]) {
@@ -63,22 +73,76 @@ class MainViewController: UIViewController {
   // MARK: - Actions
   
   @IBAction func actionClear() {
-    
+    images.send([])
   }
   
   @IBAction func actionSave() {
     guard let image = imagePreview.image else { return }
+    PhotoWriter.save(image: image).sink { [weak self] result in
+      if case .failure(let error) = result {
+        self?.showMessage("Error", description: error.localizedDescription)
+      }
+      
+      self?.actionClear()
+    } receiveValue: { [weak self] id in
+      self?.showMessage("Saved Image with Id: \(id)")
+    }.store(in: &subscriptions)
   }
   
   @IBAction func actionAdd() {
+//    images.value = images.value + [UIImage(named: "IMG_1907.jpg")!]
     
+    let viewController = storyboard?.instantiateViewController(identifier: "PhotosViewController") as? PhotosViewController
+    guard let pvc = viewController else { return }
+    
+    // Subscribe to selected images
+    let newPhotos = pvc
+      .selectedPhoto
+      .prefix(while: { [unowned self] _ in
+        self.images.value.count < 6
+      })
+      .share()
+    
+    newPhotos
+      .map { self.images.value + [$0] }
+      .assign(to: \.value, on: images)
+      .store(in: &subscriptions)
+    
+    newPhotos
+      .filter { _ in self.images.value.count == 6 }
+      .flatMap { [unowned self] _ in self.alert(title: "Limit Reached", message: "Only 6 pictures are allowed") }
+      .sink { [unowned self] _ in
+        self.navigationController?.popViewController(animated: true)
+      }.store(in: &subscriptions)
+    
+    newPhotos
+      .ignoreOutput()
+      .delay(for: 2.0, scheduler: DispatchQueue.main)
+      .sink { [unowned self] _ in
+        self.updateUI(photos: self.images.value)
+      } receiveValue: { _ in }
+      .store(in: &subscriptions)
+
+    pvc
+      .$selectedPhotosCount
+      .filter { $0 > 0 && self.images.value.count <= 5 }
+      .map { "Selected \($0) photos" }
+      .assign(to: \.title, on: self)
+      .store(in: &subscriptions)
+    
+    navigationController?.pushViewController(pvc, animated: true)
   }
   
   private func showMessage(_ title: String, description: String? = nil) {
-    let alert = UIAlertController(title: title, message: description, preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "Close", style: .default, handler: { alert in
-      self.dismiss(animated: true, completion: nil)
-    }))
-    present(alert, animated: true, completion: nil)
+//    Old Non combine way
+//    let alert = UIAlertController(title: title, message: description, preferredStyle: .alert)
+//    alert.addAction(UIAlertAction(title: "Close", style: .default, handler: { alert in
+//      self.dismiss(animated: true, completion: nil)
+//    }))
+//    present(alert, animated: true, completion: nil)
+    
+    alert(title: title, message: description)
+      .sink{ _ in }
+      .store(in: &subscriptions)
   }
 }

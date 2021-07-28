@@ -26,24 +26,30 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import UIKit
-import Combine
+import SwiftUI
 
-extension UIViewController {
-  func alert(title: String, message: String?) -> AnyPublisher<Void, Never> {
-    let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    return Future { resolver in
-      alertController.addAction(UIAlertAction(title: "Close", style: .default) { _ in
-        resolver(.success(()))
-      })
-      
-      // Show the Alert
-      self.present(alertController, animated: true)
-    }
-    .handleEvents(receiveCancel: {
-      // Handle dismiss
-      self.dismiss(animated: true)
-    })
-    .eraseToAnyPublisher()
+/// A large bordered button view.
+struct LargeInlineButton: View {
+  let title: String
+  let color = Color.blue
+  let action: () -> Void
+    
+  var body: some View {
+    Button(title, action: self.action)
+      .scaleEffect(0.8)
+      .font(.title)
+      .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: 60, alignment: .center)
+      .clipShape(RoundedRectangle(cornerRadius: 10))
+      .overlay(RoundedRectangle(cornerRadius: 10).stroke(color, lineWidth: 2))
+      .padding(.leading, 40)
+      .padding(.trailing, 40)
   }
 }
+
+#if DEBUG
+struct LargeInlineButton_Previews: PreviewProvider {
+  static var previews: some View {
+    LargeInlineButton(title: "Button!", action: {})
+  }
+}
+#endif

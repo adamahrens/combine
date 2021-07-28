@@ -26,24 +26,24 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import UIKit
-import Combine
+import SwiftUI
 
-extension UIViewController {
-  func alert(title: String, message: String?) -> AnyPublisher<Void, Never> {
-    let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    return Future { resolver in
-      alertController.addAction(UIAlertAction(title: "Close", style: .default) { _ in
-        resolver(.success(()))
-      })
-      
-      // Show the Alert
-      self.present(alertController, animated: true)
-    }
-    .handleEvents(receiveCancel: {
-      // Handle dismiss
-      self.dismiss(animated: true)
-    })
-    .eraseToAnyPublisher()
+struct Story: Codable, Identifiable {
+  let id: Int
+  let title: String
+  let by: String
+  let time: TimeInterval
+  let url: String
+}
+
+extension Story: Comparable {
+  static func < (lhs: Story, rhs: Story) -> Bool {
+    return lhs.time > rhs.time
+  }
+}
+
+extension Story: CustomDebugStringConvertible {
+  var debugDescription: String {
+    return "\(title)\nby \(by)\n\(url)\n-----"
   }
 }
